@@ -5,7 +5,7 @@ set -e
 NIGHTLY="nightly-2024-06-13"
 
 rustup toolchain install $NIGHTLY
-rustup default $NIGHTLY
+rustup override set $NIGHTLY
 rustup toolchain install $NIGHTLY-x86_64-apple-darwin --force-non-host
 rustup toolchain install $NIGHTLY-aarch64-apple-darwin --force-non-host
 rustup component add rust-src --toolchain $NIGHTLY-aarch64-apple-darwin
