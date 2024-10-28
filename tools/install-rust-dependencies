@@ -5,7 +5,6 @@ set -e
 NIGHTLY="nightly-2024-06-13"
 
 rustup toolchain install $NIGHTLY
-rustup override set $NIGHTLY
 rustup toolchain install $NIGHTLY-x86_64-apple-darwin --force-non-host
 rustup toolchain install $NIGHTLY-aarch64-apple-darwin --force-non-host
 rustup component add rust-src --toolchain $NIGHTLY-aarch64-apple-darwin
@@ -22,6 +21,8 @@ rustup target add aarch64-apple-darwin x86_64-apple-darwin
 rustup target add x86_64-apple-ios aarch64-apple-ios-sim aarch64-apple-ios
 # Wasm
 rustup target add wasm32-unknown-emscripten
+
+rustup default $NIGHTLY
 
 cargo install cbindgen --locked
 
