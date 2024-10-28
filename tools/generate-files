@@ -53,6 +53,8 @@ rm -rf jni/android/generated
 
 mkdir -p swift/Sources/Generated/Protobuf swift/Sources/Generated/Enums
 
+rustc --version
+
 # Generate coins info from registry.json
 codegen/bin/coins
 

@@ -30,6 +30,7 @@ cd rust
 
 if isTargetSpecified "native"; then
   echo "Generating Native target"
+  rustc --version
   cargo build --release --lib
 fi
 

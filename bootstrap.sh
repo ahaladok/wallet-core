@@ -39,6 +39,8 @@ if isTargetSpecified "android"; then
   tools/install-android-dependencies
 fi
 
+rustc --version
+
 echo "#### Generating files... ####"
 tools/generate-files "$@"
 
