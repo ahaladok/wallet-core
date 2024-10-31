@@ -2,6 +2,7 @@
 //
 // Copyright © 2017 Trust Wallet.
 
+use crate::script::standard_script::conditions;
 use crate::script::Script;
 use std::fmt;
 use std::str::FromStr;
@@ -19,7 +20,7 @@ pub const BITCOIN_ADDRESS_CHECKSUM_SIZE: usize = 4;
 
 type BitcoinBase58Address = Base58Address<BITCOIN_ADDRESS_SIZE, BITCOIN_ADDRESS_CHECKSUM_SIZE>;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LegacyAddress(BitcoinBase58Address);
 
 impl LegacyAddress {
@@ -97,16 +98,32 @@ impl LegacyAddress {
     }
 
     pub fn prefix(&self) -> u8 {
-        self.bytes()[0]
+        self.0.as_ref()[0]
     }
 
+    /// Address bytes excluding the prefix (skip first byte).
     pub fn bytes(&self) -> &[u8] {
-        self.0.as_ref()
+        &self.0.as_ref()[1..]
     }
 
     pub fn payload(&self) -> H160 {
-        debug_assert_eq!(self.bytes().len(), H160::LEN + 1);
-        H160::try_from(&self.0.as_ref()[1..]).expect("Legacy address must be exactly 21 bytes")
+        debug_assert_eq!(self.bytes().len(), H160::LEN);
+        H160::try_from(self.bytes()).expect("Legacy address must be exactly 20 bytes")
+    }
+
+    pub fn to_script_pubkey(&self, p2pkh_prefix: u8, p2sh_prefix: u8) -> SigningResult<Script> {
+        if p2pkh_prefix == self.prefix() {
+            // P2PKH
+            Ok(conditions::new_p2pkh(&self.payload()))
+        } else if p2sh_prefix == self.prefix() {
+            // P2SH
+            Ok(conditions::new_p2sh(&self.payload()))
+        } else {
+            // Unknown
+            SigningError::err(SigningErrorType::Error_invalid_address).context(format!(
+                "The given '{self}' address has unexpected prefix. Expected p2pkh={p2pkh_prefix} p2sh={p2sh_prefix}",
+            ))
+        }
     }
 }
 
